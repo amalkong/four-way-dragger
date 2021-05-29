@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="HandheldFriendly" content="true" />
+		<meta name="MobileOptimized" content="320" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Four-way Dragger</title>
+		<meta name="author" content="Amalkong" />
+		<meta name="description" content="This is a simple layout widget, which initially create four equal boxes which can the be resized" />
+		<meta name="keywords" content="dragger, four-way-dragger" />
+		<style type="text/css">
+			* {box-sizing:border-box;}
+			body {margin:0;}
+			input[type="range"]{
+				width:100%;
+				height:5px;
+				margin:0;
+				border-radius:20px;
+				background:#e5e5e5;
+				background-clip:content-box;
+				cursor:pointer;
+				appearance:none;
+			}
+			input[type="range"]::-moz-range-progress{
+				background-color: #10b6f1;
+				height: 5px;
+				border-radius: 50px;
+			}
+			input[type="range"]::-moz-range-thumb{
+				height:10px;
+				width:10px;
+				border-radius:50%;
+				cursor:pointer;
+				box-shadow:1px 1px 1px rgba(0, 0, 0, .2);
+				background:#fff;
+				border:5px solid #10b6f1;
+			}
+			input[type="range"]::-moz-range-track {
+				height:5px;
+				background-color:#777;
+			}
+			input[type="range"]::-webkit-slider-progress{
+				background-color: #10b6f1;
+				height: 5px;
+				border-radius: 50px;
+			}
+			input[type="range"]::-webkit-slider-thumb{
+				height:10px;
+				width:10px;
+				border-radius:50%;
+				cursor:pointer;
+				box-shadow:1px 1px 1px rgba(0, 0, 0, .2);
+				background:#fff;
+				border:5px solid #10b6f1;
+			}
+			input[type="range"]::-webkit-slider-runnable-track{
+				height:5px;
+				background-color:#777;
+			}
+			input[type="range"]::-ms-thumb{
+				height:10px;
+				width:10px;
+				border-radius:50%;
+				cursor:pointer;
+				box-shadow:1px 1px 1px rgba(0, 0, 0, .2);
+				background:#fff;
+				border:5px solid #10b6f1;
+			}
+
+			#box{position:relative;width:200px;height:200px;padding:20px;margin:10px;border:2px solid rgb(221, 221, 221);background:purple none repeat scroll 0% 0%;}
+			.grid-section,.grid-section.verticalStack{
+				display:grid;
+				grid-template-rows:100%;
+				grid-template-columns:50% 50%;
+			}
+			.grid-section.horizontalStack{
+				grid-template-rows:50% 50%;
+				grid-template-columns:100%;
+			}
+			.flex-section{
+				display:flex;
+				flex-direction:row;
+			}
+			.flex-section.horizontalStack{
+				display:flex;
+				flex-direction:column;
+			}
+			.section{
+				position:relative;
+				height:100%;
+				width:50%;
+			}
+			.flex-section.horizontalStack .section{
+				position:relative;
+				width:100%;
+				height:50%;
+			}
+			.flexi-wrap {
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				padding: 1em;
+				background: #ffffff50;
+				border-bottom: 2px dashed #444;
+				line-height: 1;
+				white-space: nowrap;
+			}
+			.flexi-wrap span {
+				margin-right: 1em;
+			}
+			pre.with-line-number{counter-reset:line;font-family:monospace;background-color:#fff;/* width:em(440); */width:calc(100% - 1em);margin:1em auto;padding:0.5em;border-radius:.25em;box-shadow:.1em .1em .5em rgba(0,0,0,.45);line-height:0;white-space:normal;}  
+			pre.with-line-number span{display:block;line-height:1.5rem;}
+			pre.with-line-number span:before{counter-increment:line;content:counter(line);display:inline-block;min-width: 30px;padding:0 .5em;margin-right:.5em;border-right:1px solid #ddd;color:#888}
+			.panel{
+				position:relative;
+				display:inline-flex;
+				flex-direction:column;
+				height:50%;
+				width:50%;
+				overflow:auto;
+				color:#222;
+				color:#777;
+				background:#555;
+			}
+			.panel-title {
+				padding: .5em;
+				background: #444;
+				color: #777;
+				font-size: 1.2rem;
+				text-align: center;
+			}
+			.panel-content {
+				height: 100%;
+				overflow: auto;
+				padding: .5em;
+			}
+			.container{
+				width:calc(100% - 2em);
+				padding:1em;
+				margin:auto;
+			}
+			.bg-deep-blue{background-color:rgb(14, 122, 156);}
+			.bg-deep-blue-text{color:rgb(81, 145, 209);}
+			#sidebar{
+				z-index: 1;
+				position:fixed;
+				top:0;
+				left:0;
+				height:100%;
+				width:40%;
+				transform: translateX(-100%);
+				transition: all 500ms ease;
+				background: #00000050;
+			}
+			#sidebar.toggled{
+				transform:translateX(0);
+			}
+			#sidebar .menu-button{
+				position:absolute;
+				right:-2rem;
+				width:2rem;
+				height:2rem;
+				display:flex;
+				justify-content:center;
+				align-items:center;
+				border-radius: 0 3px 3px 0;
+				border: 0;
+				top: 2rem;
+			}
+			#sidebar .sidebar-inner{
+				position:relative;
+				width:100%;
+				overflow:auto;
+			}
+		</style>
+	</head>
+	<body>
+		<aside id="sidebar" class="side">
+			<button id="menu-button" class="menu-button">M</button>
+			<div id="sidebar-inner" class="sidebar-inner">
+				<div class="flexi-wrap"><span class="">Resize W + H</span><input id="resizer-input" type="range" min="300" max="1000" step="1" value="100%" /></div>
+				<div class="flexi-wrap"><span class="">Resize Width</span><input id="resizer-width-input" type="range" min="50" max="100" step="0.50" value="100%" /></div>
+				<div class="flexi-wrap"><span class="">Resize Height</span><input id="resizer-height-input" type="range" min="50" max="100" step="0.50" value="100%" /></div>
+			</div>
+			<div id="sidebar-inner" class="sidebar-inner">
+				<div class="flexi-wrap"><span class="">Panels Overflow</span><input id="overflow-input" type="checkbox" checked /></div>
+				<div class="flexi-wrap"><span class="">Random BG-Color</span><input id="bg-color-input" type="checkbox" checked /></div>
+			</div>
+		</aside>
+		<section id="four-way-drag-panel" class="flex-section" style="">
+			<div id="" class="flex-section four-way" style="">
+				<div id="pane-4-1" class="panel" style="background:#10bdf4;">
+					<span class="panel-title">Pane 1</span>
+					<div class="panel-content">
+						<p>This is a simple layout widget, which initially create four equal boxes which can the be resized</p>
+						<div class="container">
+							<pre class="with-line-number" contenteditable="true">
+								<span>fourWayDragger({</span>
+								<span>	dragContainer:"#four-way-drag-panel",</span>
+								<span>	dragPanelsWrapper:".four-way",</span>
+								<span>	dragBar:'#resize-handle-4',</span>
+								<span>	dragPanel1:'#pane-4-1',</span>
+								<span>	dragPanel2:'#pane-4-2',</span>
+								<span>	dragPanel3:'#pane-4-3',</span>
+								<span>	dragPanel4:{</span>
+								<span>		selector:'#pane-4-4',</span>
+								<span>		innerContent:`&lt;h2&gt;Panel 4&lt;/h2&gt;</span>
+								<span>			&lt;div class="container"&gt;</span>
+								<span>			&lt;pre class="with-line-number" contenteditable="true"&gt;&lt;/span>
+								<span>				&lt;span&gt;def print_hi(name)&lt;/span&gt;</span>
+								<span>				&lt;span&gt;  puts "Hi, #{name}"&lt;/span&gt;</span>
+								<span>				&lt;span&gt;end&lt;/span&gt;</span>
+								<span>				&lt;span&gt;&lt;/span&gt;</span>
+								<span>				&lt;span&gt;print_hi('Tom')&lt;/span&gt;</span>
+								<span>				&lt;span&gt;#=&gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;</span>
+								<span>			&lt;/pre&gt;</span>
+								<span>		&lt;/div&gt;`,</span>
+								<span>		bgColor:randomColor()</span>
+								<span>	},</span>
+								<span>	dragShield:"#drag-shield"</span>
+								<span>});</span>
+							</pre>
+						</div>
+					</div>
+				</div>
+				<div id="pane-4-2" class="panel" style="background:#0099cc;color:#ff0000;">
+					<span class="panel-title">Pane 2</span>
+					<div class="panel-content">
+						<h3>innerHTML smoketest</h3>
+						<p>What we're going to do is use JavaScript to calculatefixpoints of innerHTML parse and reparsing.  We start with
+							an input value, encoded in a JavaScript string.<br/>
+							<code style="color: #0000BB">x.innerHTML = input</code><br/>
+							We then snapshot the DOM state of x, and then perform the iteration:
+							<code style="color: #0000BB">
+								intermediate = x.innerHTML<br/>
+								x.innerHTML = intermediate
+							</code><br/>
+							What inputs are we going to test? We will generate using the following alphabet:
+							<code style="color: #0000BB"> a01~!@#$%^&*()_+`-=[]\{}|;':",./<>? (and <space>)</code>
+						</p>
+						<textarea id="out" style="width:100%;height:100%;"></textarea>
+						<div id="testContainer" style="display:none"></div>
+						<script src="innerHTML.js" type="text/javascript"></script>
+					</div>
+				</div>
+
+				<div id="pane-4-3" class="panel" style="background:#123456;color:#ffffff;">
+					<span class="panel-title">Pane 3</span>
+					<div class="panel-content">
+						<div id="box" style="background:yellow;cursor: ns-resize;width: 261.2px;">
+							<div id="title">Resize, Drag or Snap Me!</div>
+							<div id="ajax-result" style="min-height:400px;"><iframe src="http://localhost/www/_ui/Application/libraries/php_url/index.php"></iframe></div>
+						</div>
+					</div>
+				</div>
+				<div id="pane-4-4" class="panel" style="background:cadetblue;">
+					
+				</div>
+			</div>
+			<div id="resize-handle-4" class="" title="drag to resize"><span> = </span></div>
+			<div id="drag-shield" class="drag-shield" style="display:none;position:absolute;z-index:9;top:0;width:100%;height:100%;"></div>
+		</section>
+		<script type="text/javascript">
+			document.addEventListener("DOMContentLoaded", function(){
+				const menuButton = $one("#menu-button"),
+				main = $one("#four-way-drag-panel"),
+				sidebar = $one("#sidebar"),
+				resizer = $one("#resizer-input"),
+				heightResizer = $one("#resizer-height-input"),
+				widthResizer = $one("#resizer-width-input"),
+				overflowInput = $one("#overflow-input"),
+				bgColorInput = $one("#bg-color-input"),
+				dragBar = $one("#resize-handle-4"),
+				dragPanel1 = $one("#pane-4-1"),
+				maxW = window.innerWidth, minW = maxW / 2,
+				maxH = window.innerHeight, minH = maxH / 2;
+				//alert(window.innerHeight+" - "+ (window.innerHeight/2));
+				main.style.maxHeight = window.innerHeight+'px';
+				Object.assign(resizer,{'min':minW,'max':maxW,'value':maxW,'title':`current value : ${maxW}px`});
+				Object.assign(widthResizer,{'min':minW,'max':maxW,'value':maxW,'title':`current value : ${maxW}px`});
+				Object.assign(heightResizer,{'min':minH,'max':maxH,'value':maxH,'title':`current value : ${maxH}px`});
+				
+				menuButton.addEventListener("click",(e)=>{
+					sidebar.classList.toggle("toggled");
+				});
+				var panels = $all(".panel"),
+				panelContents = $all(".panel-content"),defaultBG = "#555",defaultColor = "#777";
+				//alert(panels.length)
+				overflowInput.addEventListener("change",(e)=>{
+					if(panelContents && panelContents.length > 0){
+						panelContents.forEach(panel=>{
+							if(isElement(panel)){
+								if(e.target.checked === true||e.target.checked === "true") panel.style.overflow = "hidden";
+								else panel.style.overflow = "auto";
+							}
+						});
+					}
+				});
+				
+				bgColorInput.addEventListener("change",(e)=>{
+					if(panels && panels.length > 0){
+						panels.forEach(panel=>{
+							if(isElement(panel)){
+								if(e.target.checked === true||e.target.checked === "true") {
+									let _bgColor = randomColor(),_color = randomColor('1');
+									panel.style.cssText += `background-color:${_bgColor};color:${_color};`;
+								} else {
+									panel.style.cssText += `background-color:${defaultBG};color:${defaultColor};`;
+								}
+							}
+						});
+					}
+				});
+				
+				["change","input"].forEach(evtName=>{
+					resizer.addEventListener(evtName,(e)=>{
+						let value = e.target?.value??this?.value??"",
+						h1 = dragPanel1.offsetHeight, w1 = dragPanel1.offsetWidth,
+						h2 = main.offsetHeight, w2 = main.offsetWidth;
+						//main.style.cssText += `width:${value}%;height:${value}%;`;
+						//dragBar.style.cssText += `left:${(w2/2)-10}px;top:${(h2/2)-10}px;`;
+						main.style.cssText += `width:${value}px;height:${value}px;`;
+						dragBar.style.cssText += `left:${(w1 - 10)}px;top:${(h1 -10)}px;`;
+						resizer.title = `current value : ${value}px`;
+						Object.assign(widthResizer,{'title': `current value : ${value}px`,'value': value});
+						if(value < h2 || value > 0) Object.assign(heightResizer,{'title': `current value : ${value}px`,'value': value});
+					});
+					widthResizer.addEventListener(evtName,(e)=>{
+						let value = e.target?.value??this?.value??"", w1 = dragPanel1.offsetWidth;
+						main.style.cssText += `width:${value}px;`;
+						dragBar.style.cssText += `left:${(w1 - 10)}px;`;
+						widthResizer.title = `current value : ${value}px`;
+						Object.assign(resizer,{'title': `current value : ${value}px`,'value': value});
+					});
+					heightResizer.addEventListener(evtName,(e)=>{
+						let value = e.target?.value??this?.value??"", h1 = dragPanel1.offsetHeight;
+						main.style.cssText += `height:${value}px;`;
+						dragBar.style.cssText += `top:${(h1 -10)}px;`;
+						heightResizer.title = `current value : ${value}px`;
+						if(value < h1 || value > 0) Object.assign(resizer,{'title': `current value : ${value}px`,'value': value});
+					});
+				});
+				
+				var $menu_dragging = false, $follow_cursor = false;
+				["mousedown","touchstart"].forEach(evtName=>{
+					menuButton.addEventListener(evtName,function(e){$menu_dragging = true;console.log("menu-button dragging started");/*if(isElement($dragShield)) $dragShield.style.display = "block";*/e.preventDefault();});
+				});
+				
+				["mousemove","touchmove"].forEach(evtName=>{
+					sidebar.addEventListener(evtName,function(e){
+						if($menu_dragging){
+							if(e.pageY > 0 && e.pageY < (sidebar.offsetHeight - menuButton.offsetHeight)) {
+								menuButton.style.cssText += `top:${e.pageY}px;`;
+								//menuButton.style.cssText += `top:${(e.pageY - (menuButton.offsetHeight/2))}px;`;
+							}
+						}
+					});
+				});
+				
+				["mouseup","touchend"].forEach(evtName=>{
+					menuButton.addEventListener(evtName,function(e){if($follow_cursor === false) $menu_dragging = false;console.log("menu-button dragging ended");/*if(isElement($dragShield)) $dragShield.style.display = "block";*/e.preventDefault();});
+				});
+				
+				fourWayDragger({
+					dragContainer:"#four-way-drag-panel",
+					dragPanelsWrapper:".four-way",
+					dragBar:'#resize-handle-4',
+					dragPanel1:'#pane-4-1',
+					dragPanel2:'#pane-4-2',
+					dragPanel3:'#pane-4-3',
+					dragPanel4:{
+						selector:'#pane-4-4',
+						innerContent:'<h2>Panel 4</h2>'+
+						'<div class="panel-content">'+
+							'<div class="container">'+
+								'<pre class="with-line-number" contenteditable="true">'+
+									'<span>def print_hi(name)</span>'+
+									'<span>  puts "Hi, #{name}"</span>'+
+									'<span>end</span>'+
+									'<span></span>'+
+									'<span>print_hi(\'Tom\')</span>'+
+									'<span>#=> prints \'Hi, Tom\' to STDOUT.</span>'+
+								'</pre>'+
+							'</div>'+
+						'</div>',
+						bgColor:randomColor()
+					},
+					dragShield:"#drag-shield"
+				});
+			});
+			const isElement = (obj) => {return (typeof HTMLElement === "object" ? obj instanceof HTMLElement : obj && typeof obj === "object" && obj !== null && obj.nodeType === 1 && typeof obj.nodeName==="string");};
+			const isPlainObject = (val) => {return !!val && typeof(val) === 'object' && val.constructor === Object;};
+			const isString = (val) => {return typeof(val) === 'string';};
+			
+			const $one = (selector, context) => {
+				return (context??document).querySelector(selector);
+			}
+			
+			const $all = (selector, context) => {
+				return Array.from((context??document).querySelectorAll(selector));
+			}
+			
+			const tag = function(tagName, attributes){
+				//"use strict";return Object.assign(document.createElement(tagName),(attributes || {} ));
+				try{
+				var node, name;
+				name = isString(tagName) ? tagName.replace('<','').replace('/>','').replace('>','') : tagName;
+				
+				/* if (name === 'text') {
+					node = document.createTextNode(elem.content);
+				} else if (elem.type === 'comment') {
+					node = document.createComment(elem.content);
+				} else */
+				if (name.toLowerCase() === 'svg') {
+					node = document.createElementNS('http://www.w3.org/2000/svg', name);
+				} else {
+					node = typeof(name) === "object" && isElement(name) ? name : document.createElement(name);
+				}
+				
+				if( attributes && isPlainObject(attributes) ) {
+					// Object.assign(node, attributes);
+					for(prop in attributes) {
+						if(attributes.hasOwnProperty(prop)) node.setAttribute(prop, attributes[prop]);
+					}
+				}
+				for (var i = 2; i < arguments.length; i++) {
+					var child = arguments[i];
+					if(child){
+						if (typeof child == "string") child = document.createTextNode(child);
+						node.appendChild(child);
+					}
+				}
+				return node;
+				} catch(e){alert(e.stack?e.stack:e);return;}
+			}
+			const randomColorFactor = () => Math.round(Math.random() * 255);
+			const randomColor = (opacity) => 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',' + (opacity || '.3') + ')';
+
+			const fourWayDragger = (options)=>{
+				var $dragContainer = $one(options.dragContainer),$dragPanelsWrapper = $one(options.dragPanelsWrapper,$dragContainer);
+				if(!isElement($dragContainer)) return false;
+				if(options.dragPanelsWrapper) {if(options.dragPanelsWrapper.match(/^#/)){var dpw_sel = "id",dpw_id = options.dragPanelsWrapper.replace('#','');} else {var dpw_sel = "className",dpw_id = options.dragPanelsWrapper.replace('.','');}}
+				if(options.dragPanel1) {
+					var dp1 = format(options.dragPanel1),dp1_sel = dp1.sel_id,dp1_id = dp1.sel_val,dp1_cont = dp1.innerContent,bgcolor1 = dp1.bgColor,selector1 = dp1.selector;
+				}
+				if(options.dragPanel2) {
+					var dp2 = format(options.dragPanel2),dp2_sel = dp2.sel_id,dp2_id = dp2.sel_val,dp2_cont = dp2.innerContent,bgcolor2 = dp2.bgColor,selector2 = dp2.selector;
+				}
+				if(options.dragPanel3) {
+					var dp3 = format(options.dragPanel3),dp3_sel = dp3.sel_id,dp3_id = dp3.sel_val,dp3_cont = dp3.innerContent,bgcolor3 = dp3.bgColor,selector3 = dp3.selector;
+				}
+				if(options.dragPanel4) {
+					var dp4 = format(options.dragPanel4),dp4_sel = dp4.sel_id,dp4_id = dp4.sel_val,dp4_cont = dp4.innerContent,bgcolor4 = dp4.bgColor,selector4 = dp4.selector;
+				}
+				if(isElement($dragPanelsWrapper)){
+					var $dragBar = $one(options.dragBar,$dragContainer),$dragShield = $one(options.dragShield,$dragContainer), 
+					$dragPanel1 = $one(selector1,$dragPanelsWrapper), $dragPanel2 = $one(selector2,$dragPanelsWrapper),$dragPanel3 = $one(selector3,$dragPanelsWrapper), $dragPanel4 = $one(selector4,$dragPanelsWrapper);
+					if(isElement($dragPanel1)) $dragPanel1["innerHTML"] += dp1_cont??"";
+					if(isElement($dragPanel2)) $dragPanel2["innerHTML"] += dp2_cont??"";
+					if(isElement($dragPanel3)) $dragPanel3["innerHTML"] += dp3_cont??"";
+					if(isElement($dragPanel4)) $dragPanel4["innerHTML"] += dp4_cont??"";
+				} else {
+					var $dragPanelsWrapper = tag("div",{"style":""},
+						$dragPanel1 = tag("div",{"style":""}),
+						$dragPanel2 = tag("div",{"style":""}),
+						$dragPanel3 = tag("div",{"style":""}),
+						$dragPanel4 = tag("div",{"style":""})
+					),
+					$dragShield = tag("div",{"id":"","class":"","style":""}),
+					$dragBar = tag("div",{"id":"","class":"","style":""});
+
+					$dragPanelsWrapper[dpw_sel??"id"] = dpw_id??"drag-panel-wrapper";
+					$dragPanel1[dp1_sel??"id"] = dp1_id??"drag-panel-1";
+					$dragPanel1["innerHTML"] = dp1_cont??"";
+					$dragPanel2[dp2_sel??"id"] = dp2_id??"drag-panel-2";
+					$dragPanel2["innerHTML"] = dp2_cont??"";
+					$dragPanel3[dp3_sel??"id"] = dp3_id??"drag-panel-3";
+					$dragPanel3["innerHTML"] = dp3_cont??"";
+					$dragPanel4[dp4_sel??"id"] = dp4_id??"drag-panel-4";
+					$dragPanel4["innerHTML"] = dp4_cont??"";
+					
+					$dragContainer.appendChild($dragPanelsWrapper);
+					$dragContainer.appendChild($dragBar);
+					$dragContainer.appendChild($dragShield);
+				}
+				var textcolor = "#" + (Math.random() * 0xFFFFFF + 0x1000000).toString(16).substr(1,6),
+				$dragging = false;
+					
+				$dragContainer.style.height = (window.innerHeight-1)+"px";
+				$dragPanelsWrapper.style.cssText += "display:flex;flex-direction:row;flex-wrap: wrap;width:100%;height:100%;";
+				$dragPanel1.style.cssText += `position:relative;display:inline-flex;height:50%;width:50%;overflow:auto;background-color:${bgcolor1};color:${textcolor};`;
+				$dragPanel2.style.cssText += `position:relative;display:inline-flex;height:50%;width:50%;overflow:auto;background-color:${bgcolor2};color:${textcolor};`;
+				$dragPanel3.style.cssText += `position:relative;display:inline-flex;height:50%;width:50%;overflow:auto;background-color:${bgcolor3};color:${textcolor};`;
+				$dragPanel4.style.cssText += `position:relative;display:inline-flex;height:50%;width:50%;overflow:auto;background-color:${bgcolor4};color:${textcolor};`;
+				$dragBar.style.cssText += "z-index:11;position:absolute;top:calc(50% - 10px);left:calc(50% - 10px);width:20px;height:20px;display:flex;justify-content:center;align-items:center;font-size:50%;background-color:#444;border-radius:3px;cursor:grab;color:#fff;transition:none;";
+				
+				function dragstart(e){$dragging = true;console.log("dragging started");if(isElement($dragShield)) $dragShield.style.display = "block";e.preventDefault();}
+				function dragend(e){$dragging = false;console.log("dragging ended");if(isElement($dragShield)) $dragShield.style.display = "none";e.preventDefault();}
+				function dragmove(e){
+					if($dragging){
+						//var percentageX = (e.pageX / window.innerWidth) * 100, mainPercentageX = 100-percentageX,
+						//percentageY = (e.pageY / window.innerHeight) * 100, mainPercentageY = 100-percentageY;
+						var percentageX = (e.pageX / $dragContainer.offsetWidth) * 100, mainPercentageX = 100-percentageX,
+						percentageY = (e.pageY / $dragContainer.offsetHeight) * 100, mainPercentageY = 100-percentageY;
+						if (percentageX > 5 && percentageX < 95 && percentageY > 5 && percentageY < 95) {
+							$dragBar.style.cssText += `top:${(e.pageY-10)}px;left:${(e.pageX-10)}px;`;
+							//$dragBar.style.cssText += `top:${($dragContainer.offsetHeight/2)-10}px;left:${($dragContainer.offsetWidth/2)-10}px;`;
+							Object.assign($dragPanel1.style,{'width':percentageX + "%",'height':percentageY + "%"});
+							Object.assign($dragPanel2.style,{'width':mainPercentageX + "%",'height':percentageY + "%"});
+							Object.assign($dragPanel3.style,{'width':percentageX + "%",'height':mainPercentageY + "%"});
+							Object.assign($dragPanel4.style,{'width':mainPercentageX + "%",'height':mainPercentageY + "%"});
+						}
+					}
+				}
+				function format(obj){
+					var selector,sel_id,sel_val,innerContent = "",bg = "#" + (Math.random() * 0xFFFFFF + 0x1000000).toString(16).substr(1,6);
+					if(isString(obj) && (obj.match(/^#/) || obj.startWith('#') || obj.match(/^./) || obj.startWith('.'))) {
+						if(obj.match(/^#/)){sel_id = "id";sel_val = obj.replace('#','');} else {sel_id = "className";sel_val = obj.replace('.','');}
+						bgColor = bg;
+						selector = obj;
+					} else if(isPlainObject(obj)){
+						selector = obj.selector??"";
+						if(selector.match(/^#/)){sel_id = "id";sel_val = selector.replace('#','');} else {sel_id = "className";sel_val = selector.replace('.','');}
+						innerContent = obj.innerContent??"";
+						bgColor = obj.bgColor??bg;
+					}
+					return {sel_id,sel_val,innerContent,bgColor,selector};
+				}
+				$dragBar.addEventListener("mousedown",function(e){dragstart(e);});
+				$dragBar.addEventListener("touchstart",function(e){dragstart(e);});
+				$dragContainer.addEventListener("mousemove",function(e){dragmove(e);});
+				$dragContainer.addEventListener("touchmove",function(e){dragmove(e);});
+				$dragContainer.addEventListener("mouseup",function(e){dragend(e);});
+				$dragContainer.addEventListener("touchend",function(e){dragend(e);});
+				return;
+			}
+		</script>
+	</body>
+</html>

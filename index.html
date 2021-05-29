@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="HandheldFriendly" content="true" />
+		<meta name="MobileOptimized" content="320" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Four-way Dragger</title>
+		<meta name="author" content="Amalkong" />
+		<meta name="description" content="This is a simple layout widget, which initially create four equal boxes which can the be resized" />
+		<meta name="keywords" content="dragger, four-way-dragger" />
+		<link rel="stylesheet" type="text/css" href="./css/style.css" />
+	</head>
+	<body>
+		<section id="four-way-drag-panel" class="flex-section" style="">
+			<div id="" class="flex-section four-way" style="">
+				<div id="pane-4-1" class="panel" style="background:#10bdf4;">
+					<span class="panel-title">Pane 1</span>
+					<p>This is a simple layout widget, which initially create four equal boxes which can the be resized</p>
+					<div class="container">
+						<pre class="with-line-number" contenteditable="true">
+							<span>fourWayDragger({</span>
+							<span>	dragContainer:"#four-way-drag-panel",</span>
+							<span>	dragPanelsWrapper:".four-way",</span>
+							<span>	dragBar:'#resize-handle-4',</span>
+							<span>	dragPanel1:'#pane-4-1',</span>
+							<span>	dragPanel2:'#pane-4-2',</span>
+							<span>	dragPanel3:'#pane-4-3',</span>
+							<span>	dragPanel4:{</span>
+							<span>		selector:'#pane-4-4',</span>
+							<span>		innerContent:`&lt;h2&gt;Panel 4&lt;/h2&gt;</span>
+							<span>			&lt;div class="container"&gt;</span>
+							<span>			&lt;pre class="with-line-number" contenteditable="true"&gt;&lt;/span>
+							<span>				&lt;span&gt;def print_hi(name)&lt;/span&gt;</span>
+							<span>				&lt;span&gt;  puts "Hi, #{name}"&lt;/span&gt;</span>
+							<span>				&lt;span&gt;end&lt;/span&gt;</span>
+							<span>				&lt;span&gt;&lt;/span&gt;</span>
+							<span>				&lt;span&gt;print_hi('Tom')&lt;/span&gt;</span>
+							<span>				&lt;span&gt;#=&gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;</span>
+							<span>			&lt;/pre&gt;</span>
+							<span>		&lt;/div&gt;`,</span>
+							<span>		bgColor:randomColor()</span>
+							<span>	},</span>
+							<span>	dragShield:"#drag-shield"</span>
+							<span>});</span>
+						</pre>
+					</div>
+				</div>
+				<div id="pane-4-2" class="panel" style="background:#0099cc;color:#ff0000;">
+					<span class="panel-title">Pane 2</span>
+					<div class="" style="height:100%;overflow:auto;">
+						<h3>innerHTML smoketest</h3>
+						<p>What we're going to do is use JavaScript to calculatefixpoints of innerHTML parse and reparsing.  We start with
+							an input value, encoded in a JavaScript string.<br/>
+							<code style="color: #0000BB">x.innerHTML = input</code><br/>
+							We then snapshot the DOM state of x, and then perform the iteration:
+							<code style="color: #0000BB">
+								intermediate = x.innerHTML<br/>
+								x.innerHTML = intermediate
+							</code><br/>
+							What inputs are we going to test? We will generate using the following alphabet:
+							<code style="color: #0000BB"> a01~!@#$%^&*()_+`-=[]\{}|;':",./<>? (and <space>)</code>
+						</p>
+						<textarea id="out" style="width:100%;height:100%;"></textarea>
+						<div id="testContainer" style="display:none"></div>
+						<script src="innerHTML.js" type="text/javascript"></script>
+					</div>
+				</div>
+
+				<div id="pane-4-3" class="panel" style="background:#123456;color:#ffffff;">
+					<span class="panel-title">Pane 3</span>
+					<div id="box" style="background:yellow;cursor: ns-resize;width: 261.2px;">
+						<div id="title">Resize, Drag or Snap Me!</div>
+						<div id="ajax-result" style="min-height:400px;">Ajax Content</div>
+					</div>
+				</div>
+				<div id="pane-4-4" class="panel" style="background:cadetblue;">
+					
+				</div>
+			</div>
+			<div id="resize-handle-4" class="" title="drag to resize"><span> = </span></div>
+			<div id="drag-shield" class="drag-shield" style="display:none;position:absolute;z-index:9;top:0;width:100%;height:100%;"></div>
+		</section>
+		
+		<script type="text/javascript" src="./js/app.js"></script>
+	</body>
+</html>
